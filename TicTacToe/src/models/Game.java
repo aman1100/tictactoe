@@ -171,6 +171,15 @@ public class Game {
         }
         return true;
     }
+
+    private boolean checkWinner(Board board, Move move){
+        for(WinningStrategy winningStrategy : winningStrategies){
+            if(winningStrategy.checkWinner(board, move)){
+                return true;
+            }
+        }
+        return false;
+    }
     public void makeMove(){
         Player currentMovePlayer = players.get(nextPlayerIndex);
         System.out.println("It is " + currentMovePlayer.getName() + "'s turn. Please make your move");
@@ -186,14 +195,47 @@ public class Game {
         cellToUpdate.setCellState(CellState.FILLED);
         cellToUpdate.setPlayer(currentMovePlayer);
 
-        Move finalMoveObject = new Move(cellToUpdate, currentMovePlayer);
+        Move finalMoveObject = new Move(cellToUpdate, currentMovePlayer); //reference of board
         moves.add(finalMoveObject);
 
         nextPlayerIndex++;
-        nextPlayerIndex %= players.size();
+        nextPlayerIndex %= players.size();//to limit number of players
 
-//        if(checkWinner()){
-//
-//        }
+        if(checkWinner(board, finalMoveObject)){
+            gameState = GameState.WIN;
+            winner = currentMovePlayer;
+        }else if(moves.size() == this.board.getSize() * this.board.getSize()){
+            gameState = GameState.DRAW;
+        }
+    }
+
+    public void printBoard(){
+        board.printBoard();
+    }
+
+    public void undo(){
+        if(moves.isEmpty()){
+            System.out.println("No move to undo");
+            return;
+        }
+
+        Move lastMove = moves.get(moves.size() - 1);
+        moves.remove(lastMove);
+
+        Cell cell = lastMove.getCell();
+        cell.setPlayer(null);
+        cell.setCellState(CellState.EMPTY);
+
+        // need to update winning strategies map
+        handleUndo(board, lastMove);
+
+        nextPlayerIndex--;
+        nextPlayerIndex = (nextPlayerIndex + players.size()) % players.size();
+    }
+
+    private void handleUndo(Board board, Move lastMove) {
+        for(WinningStrategy winningStrategy : winningStrategies){
+            winningStrategy.handleUndo(board,lastMove);
+        }
     }
 }

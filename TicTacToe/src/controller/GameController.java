@@ -4,6 +4,7 @@ import exceptions.BotCountMoreThanOneException;
 import exceptions.DuplicateSymbolException;
 import exceptions.PlayerCountException;
 import models.Game;
+import models.GameState;
 import models.Player;
 import strategies.winningstratagies.WinningStrategy;
 
@@ -25,8 +26,20 @@ public class GameController {
                 .build();
     }
 
-    public void makeMove(){
+    public void makeMove(Game game){
+        game.makeMove();
 
+    }
+    public GameState checkGameState(Game game){
+        return game.getGameState();
+    }
+
+    public void printBoard(Game game){
+        game.printBoard();
+    }
+
+    public void undo(Game game){
+        game.undo();
     }
 
 }
